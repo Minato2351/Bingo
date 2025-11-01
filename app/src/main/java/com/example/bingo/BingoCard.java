@@ -7,6 +7,7 @@ import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
+import android.graphics.Rect;
 import android.util.AttributeSet;
 import android.view.View;
 
@@ -37,7 +38,9 @@ public class BingoCard extends View {
 
         // Draw the bingo card image
         if (bingoCard != null) {
-            canvas.drawBitmap(bingoCard, 0, 0, null);
+            Rect src = new Rect(0, 0, bingoCard.getWidth(), bingoCard.getHeight());
+            Rect dst = new Rect(0, 0, getWidth(), getHeight());
+            canvas.drawBitmap(bingoCard, src, dst, null);
         }
 
         // Set up paint for numbers
