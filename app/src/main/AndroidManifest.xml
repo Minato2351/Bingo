@@ -24,6 +24,8 @@
             </intent-filter>
         </activity>
         <activity android:name=".SolitarioActivity"/>
+        <activity android:name=".Perfil"/>
+        <activity android:name=".MultijugadorMenu"/>
     </application>
 
 </manifest>

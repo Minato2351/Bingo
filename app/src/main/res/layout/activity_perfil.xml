@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@drawable/fondo2">
+
+    <ImageView
+        android:id="@+id/imagenSel"
+        android:layout_width="match_parent"
+        android:layout_height="300dp"
+        android:layout_below="@id/btnSeleccionar"
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="16dp"
+        android:layout_marginEnd="16dp"
+        android:src="@drawable/gradiente"/>
+    
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="username"
+        android:textSize="24sp"
+        android:textAlignment="center"
+        android:fontFamily="@font/luckiest"
+        android:textColor="#0101ff"
+        android:layout_gravity="center_horizontal"/>
+
+    <Button
+        android:id="@+id/btnSeleccionar"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerHorizontal="true"
+        android:layout_margin="32dp"
+        android:background="@drawable/gradiente"
+        android:text="Seleccionar imagen"
+        android:textColor="@android:color/white"
+        android:fontFamily="@font/luckiest"
+        android:textSize="18sp"
+        android:layout_gravity="center_horizontal"/>
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="RÉCORD"
+        android:textColor="@color/black"
+        android:textAlignment="center"
+        android:fontFamily="@font/luckiest"
+        android:textSize="24sp"
+        android:layout_gravity="center_horizontal"
+        android:background="@drawable/gradiente"/>
+
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:layout_gravity="center_horizontal"
+        android:background="@drawable/gradiente">
+        <TextView
+            android:id="@+id/txtVictorias"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Victorias: 0"
+            android:textAlignment="center"
+            android:textColor="@color/black"
+            android:fontFamily="@font/luckiest"
+            android:textSize="24sp"
+            android:layout_gravity="center_horizontal"/>
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text=" / "
+            android:textAlignment="center"
+            android:textColor="@color/black"
+            android:fontFamily="@font/luckiest"
+            android:textSize="24sp"
+            android:layout_gravity="center_horizontal"/>
+        <TextView
+            android:id="@+id/txtDerrotas"
+            android:textColor="@color/black"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Derrotas: 0"
+            android:textAlignment="center"
+            android:fontFamily="@font/luckiest"
+            android:textSize="24sp"
+            android:layout_gravity="center_horizontal"/>
+    </LinearLayout>
+
+
+</LinearLayout>
