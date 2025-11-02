@@ -1,6 +1,7 @@
 package com.example.bingo;
 
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
@@ -18,6 +19,9 @@ public class LoadingScreen extends AppCompatActivity {
 
     ImageView imageView;
 
+    public static final String PREFS_NAME = "BingoPrefs";
+    public static final String PREF_IS_FIRST_RUN = "isFirstRun";
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -29,8 +33,21 @@ public class LoadingScreen extends AppCompatActivity {
         Glide.with(this).load(R.drawable.bingo_load).into(imageView);
 
         new Handler(Looper.getMainLooper()).postDelayed(() -> {
-            startActivity(new Intent(LoadingScreen.this, MainActivity.class));
-            finish(); // Cierra la pantalla de carga para no volver atrás con el botón de retroceso
+            SharedPreferences prefs = getSharedPreferences(PREFS_NAME, MODE_PRIVATE);
+            boolean isFirstRun = prefs.getBoolean(PREF_IS_FIRST_RUN, true);
+
+            //condicion para mostrar o no el registro de username
+            Intent intent;
+            if (isFirstRun) {
+                //ir a registrar
+                intent = new Intent(LoadingScreen.this, RegistrarActivity.class);
+            } else {
+                //ir al menu
+                intent = new Intent(LoadingScreen.this, MainActivity.class);
+            }
+
+            startActivity(intent);
+            finish();
         }, 8000);
 
     }

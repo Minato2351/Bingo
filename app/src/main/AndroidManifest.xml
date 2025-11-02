@@ -26,6 +26,7 @@
         <activity android:name=".SolitarioActivity"/>
         <activity android:name=".Perfil"/>
         <activity android:name=".MultijugadorMenu"/>
+        <activity android:name=".RegistrarActivity"/>
     </application>
 
 </manifest>

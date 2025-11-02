@@ -16,13 +16,14 @@
         android:src="@drawable/gradiente"/>
     
     <TextView
+        android:id="@+id/txtUsername"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="username"
         android:textSize="24sp"
         android:textAlignment="center"
         android:fontFamily="@font/luckiest"
-        android:textColor="#0101ff"
+        android:textColor="@color/black"
         android:layout_gravity="center_horizontal"/>
 
     <Button
@@ -33,7 +34,7 @@
         android:layout_margin="32dp"
         android:background="@drawable/gradiente"
         android:text="Seleccionar imagen"
-        android:textColor="@android:color/white"
+        android:textColor="#0101ff"
         android:fontFamily="@font/luckiest"
         android:textSize="18sp"
         android:layout_gravity="center_horizontal"/>

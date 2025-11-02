@@ -3,34 +3,46 @@ package com.example.bingo;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.media.MediaPlayer;
 import android.net.Uri;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
+import android.widget.TextView;
+
 import androidx.appcompat.app.AppCompatActivity;
 
 public class Perfil extends AppCompatActivity {
 
     Button btnSeleccionar;
     ImageView imagenSel;
+    private MediaPlayer music;
+    TextView txtUsername;
 
     int SELECT_PICTURE = 200;
 
     //shared preferences
-    private static final String PREFS_NAME = "PerfilPrefs";
+    private static final String PREFS_NAME = "BingoPrefs";
+    private static final String PREF_USERNAME = "username";
     //uri de la imagen
     private static final String PREF_IMAGE_URI = "imageUri";
 
     @Override
-    protected void onCreate(Bundle savedInstanceState)
-    {
+    protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_perfil);
 
+        music = MediaPlayer.create(this, R.raw.menu);
+        music.setLooping(true);
+
         btnSeleccionar = findViewById(R.id.btnSeleccionar);
         imagenSel = findViewById(R.id.imagenSel);
+        txtUsername = findViewById(R.id.txtUsername);
+
+        //cargar nombre del usuario
+        loadUsername();
 
         //cargar imagen guardada anteriormente
         loadProfileImage();
@@ -43,6 +55,13 @@ public class Perfil extends AppCompatActivity {
                         imageChooser();
                     }
                 });
+    }
+
+    private void loadUsername() {
+        SharedPreferences prefs = getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);
+        //buscar el nombre guardado o sino poner invitado por default
+        String username = prefs.getString(PREF_USERNAME, "Invitado");
+        txtUsername.setText(username);
     }
 
     void imageChooser()
@@ -113,6 +132,36 @@ public class Perfil extends AppCompatActivity {
             } catch (SecurityException e) {
                 Log.w("Perfil", "No se pudo cargar la imagen, permiso denegado o archivo no encontrado.", e);
             }
+        }
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        //iniciar musica
+        if (music != null) {
+            music.start();
+        }
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        //pausar musica
+        if (music != null && music.isPlaying()) {
+            music.pause();
+            //reiniciar
+            music.seekTo(0);
+        }
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        if (music != null) {
+            music.stop();
+            music.release();
+            music = null;
         }
     }
 }

@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:gravity="center"
+    android:padding="24dp"
+    android:background="@drawable/fondo1">
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="¿QUIÉN ERES?"
+        android:textSize="28sp"
+        android:textStyle="bold"
+        android:fontFamily="@font/luckiest"
+        android:background="@drawable/gradiente"
+        android:textColor="@color/black"/>
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="ELIGE TU NOMBRE"
+        android:textSize="16sp"
+        android:layout_marginTop="16dp"
+        android:fontFamily="@font/luckiest"
+        android:background="@drawable/gradiente"
+        android:textColor="@color/black"/>
+
+    <EditText
+        android:id="@+id/etUsername"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="Tu nombre"
+        android:inputType="textPersonName"
+        android:layout_marginTop="16dp"
+        android:fontFamily="@font/luckiest"
+        android:background="@drawable/gradiente"/>
+
+    <Button
+        android:id="@+id/btnSaveName"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="GUARDAR"
+        android:layout_marginTop="24dp"
+        android:fontFamily="@font/luckiest"
+        android:textColor="#0101ff"
+        android:textSize="18sp"
+        android:background="@drawable/gradiente"/>
+
+</LinearLayout>

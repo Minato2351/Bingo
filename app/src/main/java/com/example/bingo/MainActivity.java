@@ -1,6 +1,7 @@
 package com.example.bingo;
 
 import android.content.Intent;
+import android.media.MediaPlayer;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
@@ -13,6 +14,7 @@ import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 
 public class MainActivity extends AppCompatActivity {
+    private MediaPlayer music;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -24,6 +26,9 @@ public class MainActivity extends AppCompatActivity {
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
             return insets;
         });
+
+        music = MediaPlayer.create(this, R.raw.menu);
+        music.setLooping(true);
 
         Button solitario = findViewById(R.id.btnSolitario);
         Button multijugador = findViewById(R.id.btnMultijugador);
@@ -52,5 +57,35 @@ public class MainActivity extends AppCompatActivity {
                 startActivity(intent);
             }
         });
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        //iniciar musica
+        if (music != null) {
+            music.start();
+        }
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        //pausar musica
+        if (music != null && music.isPlaying()) {
+            music.pause();
+            //reiniciar
+            music.seekTo(0);
+        }
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        if (music != null) {
+            music.stop();
+            music.release();
+            music = null;
+        }
     }
 }
