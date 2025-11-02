@@ -1,7 +1,47 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@drawable/fondo2">
+    android:orientation="vertical"
+    android:gravity="center"
+    android:padding="24dp"
+    android:background="@drawable/fondo1">
 
-</androidx.constraintlayout.widget.ConstraintLayout>
+    <Button
+        android:id="@+id/btnCrear"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="CREAR PARTIDA"
+        android:layout_marginTop="24dp"
+        android:fontFamily="@font/luckiest"
+        android:textColor="#0101ff"
+        android:textSize="18sp"
+        android:background="@drawable/gradiente"/>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+        <EditText
+            android:id="@+id/txtID"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="INGRESA EL ID"
+            android:inputType="textPersonName"
+            android:layout_marginTop="30dp"
+            android:fontFamily="@font/luckiest"
+            android:background="@color/white"
+            android:textAlignment="center"/>
+
+        <Button
+            android:id="@+id/btnUnirse"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="UNIRSE"
+            android:fontFamily="@font/luckiest"
+            android:textColor="#0101ff"
+            android:textSize="18sp"
+            android:background="@drawable/gradiente"/>
+    </LinearLayout>
+
+</LinearLayout>
