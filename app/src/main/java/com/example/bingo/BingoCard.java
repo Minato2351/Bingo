@@ -9,7 +9,9 @@ import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Rect;
 import android.util.AttributeSet;
+import android.view.MotionEvent;
 import android.view.View;
+import android.widget.Toast;
 
 public class BingoCard extends View {
     public int[][] cuadros = new int[5][5];
@@ -44,26 +46,73 @@ public class BingoCard extends View {
         }
 
         // Set up paint for numbers
-        paint.setColor(Color.BLACK);
-        paint.setTextSize(48);
+        paint.setColor(Color.parseColor("#800080"));
+        paint.setTextSize(90);
+        paint.setFakeBoldText(true);
         paint.setTextAlign(Paint.Align.CENTER);
 
-        float cellWidth = getWidth() / 5f;
-        float cellHeight = getHeight() / 5f;
+        float cellWidth = getWidth() / 6f;
+        float cellHeight = getHeight() / 6.9f;
+        float topMargin = getHeight() * 0.20f;
+        float leftMargin = getHeight() * 0.033f;
 
         // Draw numbers in each cell
         for (int i = 0; i < 5; i++) {
+            switch (i){
+                case 1:
+                    paint.setColor(Color.parseColor("#2196F3"));
+                    break;
+                case 2:
+                    paint.setColor(Color.parseColor("#4CAF50"));
+                    break;
+                case 3:
+                    paint.setColor(Color.parseColor("#FFEB3B"));
+                    break;
+                case 4:
+                    paint.setColor(Color.parseColor("#FF9800"));
+                    break;
+            }
             for (int j = 0; j < 5; j++) {
                 if (cuadros[i][j] != 0) {
-                    float x = i * cellWidth + cellWidth / 2;
-                    float y = j * cellHeight + cellHeight / 1.7f;
+                    float x = i * cellWidth + cellWidth / 2 + leftMargin;
+                    float y = j * cellHeight + cellHeight / 1.7f + topMargin;
                     canvas.drawText(String.valueOf(cuadros[i][j]), x, y, paint);
                 } else if (i == 2 && j == 2) {
-                    paint.setColor(Color.RED);
-                    canvas.drawText("FREE", i * cellWidth + cellWidth / 2, j * cellHeight + cellHeight / 1.7f, paint);
-                    paint.setColor(Color.BLACK);
                 }
             }
         }
+    }
+
+    @Override
+    public boolean onTouchEvent(MotionEvent event) {
+        if (event.getAction() == MotionEvent.ACTION_DOWN) {
+            float cellWidth = getWidth() / 6f;
+            float cellHeight = getHeight() / 6.9f;
+            float topMargin = getHeight() * 0.20f;
+            float leftMargin = getHeight() * 0.033f;
+
+            // Determine which cell was tapped
+            float x = event.getX() - leftMargin;
+            float y = event.getY() - topMargin;
+
+            // Ignore taps outside the actual bingo grid
+            if (x < 0 || y < 0) return false;
+            if (x > cellWidth * 5 || y > cellHeight * 5) return false;
+
+            // Determine which cell was tapped
+            int col = (int) (x / cellWidth);
+            int row = (int) (y / cellHeight);
+
+            if (col >= 0 && col < 5 && row >= 0 && row < 5) {
+                int number = cuadros[col][row];
+                if (number == 0 && col == 2 && row == 2) {
+                    Toast.makeText(getContext(), "FREE space!", Toast.LENGTH_SHORT).show();
+                } else {
+                    Toast.makeText(getContext(), "You tapped: " + number, Toast.LENGTH_SHORT).show();
+                }
+            }
+            return true;
+        }
+        return super.onTouchEvent(event);
     }
 }

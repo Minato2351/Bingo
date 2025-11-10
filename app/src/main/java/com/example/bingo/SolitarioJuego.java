@@ -4,10 +4,9 @@ import android.os.Bundle;
 
 import androidx.appcompat.app.AppCompatActivity;
 
-public class SolitarioActivity extends AppCompatActivity {
-    @Override
+public class SolitarioJuego extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_solitario); // connects to activity_second.xml
+        setContentView(R.layout.activity_solitario_juego);
     }
 }

@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:gravity="center"
+    android:padding="24dp"
+    android:background="@drawable/fondo1">
+    <TextView
+        android:id="@+id/TextBot"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/TextBot"
+        android:layout_marginTop="24dp"
+        android:fontFamily="@font/luckiest"
+        android:textColor="#0101ff"
+        android:textSize="18sp"/>
+
+    <Button
+        android:id="@+id/btnComenzar"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/btnComenzar"
+        android:layout_marginTop="24dp"
+        android:fontFamily="@font/luckiest"
+        android:textColor="#0101ff"
+        android:textSize="18sp"
+        android:background="@drawable/gradiente"/>
+
+    <Button
+        android:id="@+id/btnRegresar"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/btnRegresar"
+        android:layout_marginTop="24dp"
+        android:fontFamily="@font/luckiest"
+        android:textColor="#0101ff"
+        android:textSize="18sp"
+        android:background="@drawable/gradiente"
+        />
+
+
+</LinearLayout>

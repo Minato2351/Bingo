@@ -23,10 +23,11 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name=".SolitarioActivity"/>
+        <activity android:name=".SolitarioMenu"/>
         <activity android:name=".Perfil"/>
         <activity android:name=".MultijugadorMenu"/>
         <activity android:name=".RegistrarActivity"/>
+        <activity android:name=".SolitarioJuego"/>
     </application>
 
 </manifest>
