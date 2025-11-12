@@ -14,9 +14,11 @@ import android.view.View;
 import android.widget.Toast;
 
 public class BingoCard extends View {
-    public int[][] cuadros = new int[5][5];
+    Cuadro[][] cuadros = new Cuadro[5][5];
     private Bitmap bingoCard;
     private Paint paint = new Paint(Paint.ANTI_ALIAS_FLAG);
+    int numeroRand = 0;
+    private Bitmap estampa;
 
     public BingoCard(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -27,11 +29,14 @@ public class BingoCard extends View {
     private void init(){
         for(int i=0; i<5; i++){
             for(int j=0; j<5; j++){
-                cuadros[i][j] = (int)(Math.random() * (15) + 1 + (i * 15));
+                numeroRand = (int)(Math.random() * (15) + 1 + (i * 15));
+                cuadros[i][j] = new Cuadro(numeroRand, false);
             }
         }
-        cuadros[2][2] = 0;
+        cuadros[2][2].numero = 0;
+        cuadros[2][2].estampa = true;
         bingoCard = BitmapFactory.decodeResource(getResources(), R.drawable.bingo_card);
+        estampa = BitmapFactory.decodeResource(getResources(), R.drawable.estampa);
     }
 
     @Override
@@ -73,11 +78,26 @@ public class BingoCard extends View {
                     break;
             }
             for (int j = 0; j < 5; j++) {
-                if (cuadros[i][j] != 0) {
-                    float x = i * cellWidth + cellWidth / 2 + leftMargin;
-                    float y = j * cellHeight + cellHeight / 1.7f + topMargin;
-                    canvas.drawText(String.valueOf(cuadros[i][j]), x, y, paint);
-                } else if (i == 2 && j == 2) {
+                if (i == 2 && j == 2 ) {}
+                else {
+                    if (cuadros[i][j].numero != 0) {
+                        float x = i * cellWidth + cellWidth / 2 + leftMargin;
+                        float y = j * cellHeight + cellHeight / 1.7f + topMargin;
+                        canvas.drawText(String.valueOf(cuadros[i][j].numero), x, y, paint);
+                        if(cuadros[i][j].estampa == true) {
+                            float imageSize = cellWidth * 1.2f; // 60% del cuadro
+                            float imageX = x - imageSize / 2;   // centra
+                            float imageY = y - imageSize / 2;   // centra
+
+                            Rect dst = new Rect(
+                                    (int) imageX,
+                                    (int) imageY,
+                                    (int) (imageX + imageSize),
+                                    (int) (imageY + imageSize)
+                            );
+                            canvas.drawBitmap(estampa, null, dst, null);
+                        }
+                    }
                 }
             }
         }
@@ -104,11 +124,18 @@ public class BingoCard extends View {
             int row = (int) (y / cellHeight);
 
             if (col >= 0 && col < 5 && row >= 0 && row < 5) {
-                int number = cuadros[col][row];
+                int number = cuadros[col][row].numero;
                 if (number == 0 && col == 2 && row == 2) {
                     Toast.makeText(getContext(), "FREE space!", Toast.LENGTH_SHORT).show();
                 } else {
                     Toast.makeText(getContext(), "You tapped: " + number, Toast.LENGTH_SHORT).show();
+                    if(cuadros[col][row].estampa == true){
+                        cuadros[col][row].estampa = false;
+                        invalidate();
+                    }else{
+                        cuadros[col][row].estampa = true;
+                        invalidate();
+                    }
                 }
             }
             return true;
