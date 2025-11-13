@@ -15,6 +15,8 @@ import android.widget.Toast;
 
 public class BingoCard extends View {
     Cuadro[][] cuadros = new Cuadro[5][5];
+    int[] Numeros = new int[5]; //Evita repeticion
+    boolean repetido = false;
     private Bitmap bingoCard;
     private Paint paint = new Paint(Paint.ANTI_ALIAS_FLAG);
     int numeroRand = 0;
@@ -30,7 +32,18 @@ public class BingoCard extends View {
         for(int i=0; i<5; i++){
             for(int j=0; j<5; j++){
                 numeroRand = (int)(Math.random() * (15) + 1 + (i * 15));
-                cuadros[i][j] = new Cuadro(numeroRand, false);
+                for(int z=0; z<5; z++){
+                    if(numeroRand == Numeros[z]){
+                        repetido = true;
+                    }
+                }
+                if(repetido == false){
+                    Numeros[j] = numeroRand;
+                    cuadros[i][j] = new Cuadro(numeroRand, false);
+                }else if(repetido == true){
+                    j--;
+                    repetido = false;
+                }
             }
         }
         cuadros[2][2].numero = 0;
