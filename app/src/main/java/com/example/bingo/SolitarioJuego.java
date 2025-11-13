@@ -1,10 +1,13 @@
 package com.example.bingo;
 
+import android.graphics.Color;
+import android.graphics.drawable.GradientDrawable;
 import android.media.MediaPlayer;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.provider.MediaStore;
+import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -29,6 +32,20 @@ public class SolitarioJuego extends AppCompatActivity {
 
         music = MediaPlayer.create(this, R.raw.inicio_juego);
         music.setLooping(true);
+        Button rainbowButton = findViewById(R.id.rainbowButton); //BINGO!!
+
+        GradientDrawable rainbow = new GradientDrawable(
+                GradientDrawable.Orientation.LEFT_RIGHT,
+                new int[]{
+                        Color.parseColor("#D8B4E2"), // Purple
+                        Color.parseColor("#ADD8E6"), // Blue
+                        Color.parseColor("#90EE90"), // Green
+                        Color.parseColor("#FFFACD"), // Yellow
+                        Color.parseColor("#FFD580")  // Orange
+                }
+        );
+        rainbow.setCornerRadius(20f);
+        rainbowButton.setBackground(rainbow);
 
         generadorNumeros = new GeneradorNumeros();
 
