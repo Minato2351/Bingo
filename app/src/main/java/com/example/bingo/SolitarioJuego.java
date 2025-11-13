@@ -7,23 +7,34 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.provider.MediaStore;
+import android.util.Log;
+import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import java.lang.reflect.Array;
+import java.util.ArrayList;
+
 public class SolitarioJuego extends AppCompatActivity {
     private MediaPlayer music;
 
-    private GeneradorNumeros generadorNumeros;
+    private GeneradorNumeros generadorNumeros; //Genera numeros a preionar y los guardaen un array
+    private BingoCard bingoCard; //Genera una carta Bingo y guarda cuales se han seleccionado
     private TextView txtNumero;
 
     //tiempo entre cada numero
     private Handler handler = new Handler(Looper.getMainLooper());
     private Runnable runnableJuego;
 
+    //variables utilizados para verificar si termina el juego o no
+    private ArrayList<Integer> numerosLlamados;
+    private ArrayList<Integer> numerosCarta;
+
     private static final int TIEMPO_ESPERA = 3000; // 3 segundos
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -32,8 +43,12 @@ public class SolitarioJuego extends AppCompatActivity {
 
         music = MediaPlayer.create(this, R.raw.inicio_juego);
         music.setLooping(true);
-        Button rainbowButton = findViewById(R.id.rainbowButton); //BINGO!!
 
+        /*--------------------------------------------------
+    BINGO!!! por ahora es un button pero le agregaremos un sensor*/
+        numerosCarta = new ArrayList<>();
+        numerosLlamados = new ArrayList<>();
+        Button rainbowButton = findViewById(R.id.rainbowButton); //BINGO!!
         GradientDrawable rainbow = new GradientDrawable(
                 GradientDrawable.Orientation.LEFT_RIGHT,
                 new int[]{
@@ -46,8 +61,23 @@ public class SolitarioJuego extends AppCompatActivity {
         );
         rainbow.setCornerRadius(20f);
         rainbowButton.setBackground(rainbow);
+        rainbowButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                numerosLlamados = generadorNumeros.getNumerosLlamados();
+                for (int i = 0; i < 5; i++) {
+                    for (int j = 0; j < 5; j++) {
+                        numerosCarta.add(bingoCard.cuadros[i][j].numero);
+                    }
+                }
+                Log.d("BingoNumeros", "Lista: " + numerosLlamados);
+                Log.d("BingoCarta", "Carta: " + numerosCarta);
+
+            }
+        });
 
         generadorNumeros = new GeneradorNumeros();
+        bingoCard = findViewById(R.id.bingoCard);
 
         txtNumero = findViewById(R.id.txtNumero);
 
@@ -127,5 +157,9 @@ public class SolitarioJuego extends AppCompatActivity {
             music.release();
             music = null;
         }
+    }
+
+    private void terminarJuego(){
+
     }
 }

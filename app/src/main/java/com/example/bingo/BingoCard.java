@@ -155,4 +155,8 @@ public class BingoCard extends View {
         }
         return super.onTouchEvent(event);
     }
+
+    public Cuadro[][] getCuadros() {
+        return cuadros;
+    }
 }
