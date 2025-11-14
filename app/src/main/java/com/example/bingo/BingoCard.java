@@ -22,6 +22,17 @@ public class BingoCard extends View {
     int numeroRand = 0;
     private Bitmap estampa;
 
+    //intefaz para notificar cambios (para el boton bingo)
+    public interface OnCardChangedListener {
+        void onCardChanged();
+    }
+
+    private OnCardChangedListener mListener;
+
+    public void setOnCardChangedListener(OnCardChangedListener listener) {
+        this.mListener = listener;
+    }
+
     public BingoCard(Context context, AttributeSet attrs) {
         super(context, attrs);
         init();
@@ -148,6 +159,11 @@ public class BingoCard extends View {
                     }else{
                         cuadros[col][row].estampa = true;
                         invalidate();
+                    }
+
+                    //notificar al listener
+                    if (mListener != null) {
+                        mListener.onCardChanged();
                     }
                 }
             }

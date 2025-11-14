@@ -18,12 +18,13 @@ import androidx.appcompat.app.AppCompatActivity;
 import java.lang.reflect.Array;
 import java.util.ArrayList;
 
-public class SolitarioJuego extends AppCompatActivity {
+public class SolitarioJuego extends AppCompatActivity implements BingoCard.OnCardChangedListener {
     private MediaPlayer music;
 
     private GeneradorNumeros generadorNumeros; //Genera numeros a preionar y los guardaen un array
     private BingoCard bingoCard; //Genera una carta Bingo y guarda cuales se han seleccionado
     private TextView txtNumero;
+    private Button rainbowButton;
 
     //tiempo entre cada numero
     private Handler handler = new Handler(Looper.getMainLooper());
@@ -48,7 +49,7 @@ public class SolitarioJuego extends AppCompatActivity {
     BINGO!!! por ahora es un button pero le agregaremos un sensor*/
         numerosCarta = new ArrayList<>();
         numerosLlamados = new ArrayList<>();
-        Button rainbowButton = findViewById(R.id.rainbowButton); //BINGO!!
+        rainbowButton = findViewById(R.id.rainbowButton); //BINGO!!
         GradientDrawable rainbow = new GradientDrawable(
                 GradientDrawable.Orientation.LEFT_RIGHT,
                 new int[]{
@@ -61,6 +62,7 @@ public class SolitarioJuego extends AppCompatActivity {
         );
         rainbow.setCornerRadius(20f);
         rainbowButton.setBackground(rainbow);
+        rainbowButton.setEnabled(false); //desactivado por default
         rainbowButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -79,6 +81,8 @@ public class SolitarioJuego extends AppCompatActivity {
         generadorNumeros = new GeneradorNumeros();
         bingoCard = findViewById(R.id.bingoCard);
 
+        bingoCard.setOnCardChangedListener(this); //actividad como listener
+
         txtNumero = findViewById(R.id.txtNumero);
 
         runnableJuego = new Runnable() {
@@ -89,6 +93,64 @@ public class SolitarioJuego extends AppCompatActivity {
         };
 
         llamarSiguienteNumero();
+    }
+
+    //se llama cada vez que se toque la carta
+    @Override
+    public void onCardChanged() {
+        //revisar si hay bingo para cambiar estado del botón
+        if (checkForBingo()) {
+            rainbowButton.setEnabled(true);
+        } else {
+            rainbowButton.setEnabled(false);
+        }
+    }
+
+    //verificar si hay una linea para bingo
+    private boolean checkForBingo() {
+        Cuadro[][] cuadros = bingoCard.getCuadros();
+        if (cuadros == null) {
+            return false;
+        }
+
+        //i columma, j fila
+        for (int j = 0; j < 5; j++) {
+            if (cuadros[0][j].estampa &&
+                    cuadros[1][j].estampa &&
+                    cuadros[2][j].estampa &&
+                    cuadros[3][j].estampa &&
+                    cuadros[4][j].estampa) {
+                return true; //bingo fila j
+            }
+        }
+
+        for (int i = 0; i < 5; i++) {
+            if (cuadros[i][0].estampa &&
+                    cuadros[i][1].estampa &&
+                    cuadros[i][2].estampa &&
+                    cuadros[i][3].estampa &&
+                    cuadros[i][4].estampa) {
+                return true; //bingo columna i
+            }
+        }
+
+        if (cuadros[0][0].estampa &&
+                cuadros[1][1].estampa &&
+                cuadros[2][2].estampa &&
+                cuadros[3][3].estampa &&
+                cuadros[4][4].estampa) {
+            return true; //bingo diagonal 1 (arriba izq - abajo der)
+        }
+
+        if(cuadros[4][0].estampa &&
+                cuadros[3][1].estampa &&
+                cuadros[2][2].estampa &&
+                cuadros[1][3].estampa &&
+                cuadros[0][4].estampa) {
+            return true; //bingo diagonal (arriba der - abajo izq)
+        }
+
+        return false; //no hay bingo
     }
 
     private void llamarSiguienteNumero() {
