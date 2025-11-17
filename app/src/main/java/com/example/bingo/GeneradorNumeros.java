@@ -55,6 +55,7 @@ public class GeneradorNumeros {
     }
 
     public ArrayList<Integer> getNumerosLlamados() {
+        numerosLlamados.add(0);
         return numerosLlamados;
     }
 }

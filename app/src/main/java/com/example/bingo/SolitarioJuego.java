@@ -73,12 +73,22 @@ public class SolitarioJuego extends AppCompatActivity implements BingoCard.OnCar
 
                 if (ganadores != null && !ganadores.isEmpty()) {
                     numerosCarta.addAll(ganadores);
-                    Toast.makeText(SolitarioJuego.this, "BINGO", Toast.LENGTH_SHORT).show();
+                    boolean allFound = true;
+                    for (int num : numerosCarta) {
+                        if (!numerosLlamados.contains(num)) {
+                            allFound = false;
+                            break;  // detenerse si uno no se encuentra
+                        }
+                    }
+
+                    if (allFound) {
+                        Toast.makeText(SolitarioJuego.this, "GANASTE", Toast.LENGTH_SHORT).show();
+                    } else {
+                        Toast.makeText(SolitarioJuego.this, "PERDISTE", Toast.LENGTH_SHORT).show();
+                    }
+                    Log.d("BingoNumeros", "Lista: " + numerosLlamados);
+                    Log.d("BingoCarta", "Carta: " + numerosCarta);
                 }
-
-                Log.d("BingoNumeros", "Lista: " + numerosLlamados);
-                Log.d("BingoCarta", "Carta: " + numerosCarta);
-
             }
         });
 
