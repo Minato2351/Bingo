@@ -36,7 +36,6 @@ public class SolitarioJuego extends AppCompatActivity implements BingoCard.OnCar
 
     private static final int TIEMPO_ESPERA = 3000; // 3 segundos
 
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -63,15 +62,20 @@ public class SolitarioJuego extends AppCompatActivity implements BingoCard.OnCar
         rainbow.setCornerRadius(20f);
         rainbowButton.setBackground(rainbow);
         rainbowButton.setEnabled(false); //desactivado por default
+
         rainbowButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 numerosLlamados = generadorNumeros.getNumerosLlamados();
-                for (int i = 0; i < 5; i++) {
-                    for (int j = 0; j < 5; j++) {
-                        numerosCarta.add(bingoCard.cuadros[i][j].numero);
-                    }
+
+                numerosCarta.clear(); //limpiar y buscar solo el bingo
+                ArrayList<Integer> ganadores = obtenerLineaGanadora();
+
+                if (ganadores != null && !ganadores.isEmpty()) {
+                    numerosCarta.addAll(ganadores);
+                    Toast.makeText(SolitarioJuego.this, "BINGO", Toast.LENGTH_SHORT).show();
                 }
+
                 Log.d("BingoNumeros", "Lista: " + numerosLlamados);
                 Log.d("BingoCarta", "Carta: " + numerosCarta);
 
@@ -99,58 +103,65 @@ public class SolitarioJuego extends AppCompatActivity implements BingoCard.OnCar
     @Override
     public void onCardChanged() {
         //revisar si hay bingo para cambiar estado del botón
-        if (checkForBingo()) {
+        if (!obtenerLineaGanadora().isEmpty()) {
             rainbowButton.setEnabled(true);
         } else {
             rainbowButton.setEnabled(false);
         }
     }
 
-    //verificar si hay una linea para bingo
-    private boolean checkForBingo() {
+    //devuelve los numeros de la linea con bingo
+    private ArrayList<Integer> obtenerLineaGanadora() {
+        ArrayList<Integer> lineaGanadora = new ArrayList<>();
         Cuadro[][] cuadros = bingoCard.getCuadros();
+
         if (cuadros == null) {
-            return false;
+            return lineaGanadora;
         }
 
-        //i columma, j fila
-        for (int j = 0; j < 5; j++) {
-            if (cuadros[0][j].estampa &&
-                    cuadros[1][j].estampa &&
-                    cuadros[2][j].estampa &&
-                    cuadros[3][j].estampa &&
-                    cuadros[4][j].estampa) {
-                return true; //bingo fila j
+        //revisa filas
+        for (int j = 0; j <5; j++) {
+            if (cuadros[0][j].estampa && cuadros[1][j].estampa && cuadros[2][j].estampa &&
+            cuadros[3][j].estampa && cuadros[4][j].estampa) {
+                for (int i = 0; i < 5; i++) {
+                    lineaGanadora.add(cuadros[i][j].numero); //fila completa, guardamos numeros
+                }
+                return lineaGanadora;
             }
         }
 
-        for (int i = 0; i < 5; i++) {
-            if (cuadros[i][0].estampa &&
-                    cuadros[i][1].estampa &&
-                    cuadros[i][2].estampa &&
-                    cuadros[i][3].estampa &&
-                    cuadros[i][4].estampa) {
-                return true; //bingo columna i
+        //revisa columnas
+        for (int i = 0; i <5; i++) {
+            if (cuadros[i][0].estampa && cuadros[i][1].estampa && cuadros[i][2].estampa &&
+                    cuadros[i][3].estampa && cuadros[i][4].estampa) {
+                for (int j = 0; j < 5; j++) {
+                    lineaGanadora.add(cuadros[i][j].numero); //col completa, guardamos numeros
+                }
+                return lineaGanadora;
             }
         }
 
-        if (cuadros[0][0].estampa &&
-                cuadros[1][1].estampa &&
-                cuadros[2][2].estampa &&
-                cuadros[3][3].estampa &&
-                cuadros[4][4].estampa) {
-            return true; //bingo diagonal 1 (arriba izq - abajo der)
+        //diagonal izq-der
+        if (cuadros[0][0].estampa && cuadros[1][1].estampa && cuadros[2][2].estampa &&
+                cuadros[3][3].estampa && cuadros[4][4].estampa) {
+
+            for(int k=0; k<5; k++) {
+                lineaGanadora.add(cuadros[k][k].numero);
+            }
+            return lineaGanadora;
         }
 
-        if(cuadros[4][0].estampa &&
-                cuadros[3][1].estampa &&
-                cuadros[2][2].estampa &&
-                cuadros[1][3].estampa &&
-                cuadros[0][4].estampa) {
-            return true; //bingo diagonal (arriba der - abajo izq)
+        //diagonal der-izq
+        if (cuadros[4][0].estampa && cuadros[3][1].estampa && cuadros[2][2].estampa &&
+                cuadros[1][3].estampa && cuadros[0][4].estampa) {
+
+            for(int k=0; k<5; k++) {
+                lineaGanadora.add(cuadros[4-k][k].numero);
+            }
+            return lineaGanadora;
         }
 
-        return false; //no hay bingo
+        return lineaGanadora; //vacia si no hay bingo
     }
 
     private void llamarSiguienteNumero() {
