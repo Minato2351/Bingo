@@ -3,4 +3,6 @@
     <string name="TextBot">Número de Bots: </string>
     <string name="btnComenzar">COMENZAR PARTIDA</string>
     <string name="btnRegresar">REGRESAR</string>
+    <string name="leftArrow">&lt;</string>
+    <string name="rightArrow">&gt;</string>
 </resources>

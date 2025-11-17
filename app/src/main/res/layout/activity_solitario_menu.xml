@@ -6,15 +6,57 @@
     android:gravity="center"
     android:padding="24dp"
     android:background="@drawable/fondo1">
-    <TextView
-        android:id="@+id/TextBot"
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="@string/TextBot"
-        android:layout_marginTop="24dp"
-        android:fontFamily="@font/luckiest"
-        android:textColor="#0101ff"
-        android:textSize="18sp"/>
+        android:orientation="horizontal"
+        android:layout_gravity="center_vertical">
+        <TextView
+            android:id="@+id/TextBot"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="@string/TextBot"
+            android:gravity="center"
+            android:layout_marginTop="28dp"
+            android:fontFamily="@font/luckiest"
+            android:textColor="#0101ff"
+            android:textSize="25sp"/>
+        <Button
+            android:id="@+id/leftArrow"
+            android:layout_width="40dp"
+            android:layout_height="wrap_content"
+            android:text="@string/leftArrow"
+            android:gravity="center"
+            android:layout_marginTop="24dp"
+            android:fontFamily="@font/luckiest"
+            android:textColor="#0101ff"
+            android:textSize="18sp"
+            android:background="@drawable/gradiente"/>
+        <TextView
+            android:id="@+id/TextBotNum"
+            android:layout_width="40dp"
+            android:layout_height="wrap_content"
+            android:text="0"
+            android:gravity="center"
+            android:layout_marginTop="30dp"
+            android:fontFamily="@font/luckiest"
+            android:textColor="#DE73FF"
+            android:textSize="40sp"/>
+        <Button
+            android:id="@+id/rightArrow"
+            android:layout_width="40dp"
+            android:layout_height="wrap_content"
+            android:text="@string/rightArrow"
+            android:gravity="center"
+            android:layout_marginTop="24dp"
+            android:fontFamily="@font/luckiest"
+            android:textColor="#0101ff"
+            android:textSize="18sp"
+            android:background="@drawable/gradiente"/>
+
+    </LinearLayout>
+
 
     <Button
         android:id="@+id/btnComenzar"

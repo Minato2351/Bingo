@@ -5,6 +5,8 @@ import android.media.MediaPlayer;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
+import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 
@@ -21,6 +23,9 @@ public class SolitarioMenu extends AppCompatActivity {
 
         Button Comenzar = findViewById(R.id.btnComenzar);
         Button Regresar = findViewById(R.id.btnRegresar);
+        Button leftArrow = findViewById(R.id.leftArrow);
+        Button rightArrow = findViewById(R.id.rightArrow);
+        TextView TextBotNum = findViewById(R.id.TextBotNum);
 
         Comenzar.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -35,6 +40,34 @@ public class SolitarioMenu extends AppCompatActivity {
             public void onClick(View v) {
                 Intent intent = new Intent(SolitarioMenu.this, MainActivity.class);
                 startActivity(intent);
+            }
+        });
+
+        leftArrow.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                String text = TextBotNum.getText().toString();
+                int value = Integer.parseInt(text);
+                value--;
+                if(value<0){
+                    Toast.makeText(SolitarioMenu.this, "Limite Inferior", Toast.LENGTH_SHORT).show();
+                }else{
+                    TextBotNum.setText(String.valueOf(value));
+                }
+            }
+        });
+
+        rightArrow.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                String text = TextBotNum.getText().toString();
+                int value = Integer.parseInt(text);
+                value++;
+                if(value>3){
+                    Toast.makeText(SolitarioMenu.this, "Limite Superior", Toast.LENGTH_SHORT).show();
+                }else{
+                    TextBotNum.setText(String.valueOf(value));
+                }
             }
         });
     }
