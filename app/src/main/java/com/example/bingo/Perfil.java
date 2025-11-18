@@ -20,6 +20,7 @@ public class Perfil extends AppCompatActivity {
     ImageView imagenSel;
     private MediaPlayer music;
     TextView txtUsername;
+    TextView txtVictorias, txtDerrotas;
 
     int SELECT_PICTURE = 200;
 
@@ -40,6 +41,8 @@ public class Perfil extends AppCompatActivity {
         btnSeleccionar = findViewById(R.id.btnSeleccionar);
         imagenSel = findViewById(R.id.imagenSel);
         txtUsername = findViewById(R.id.txtUsername);
+        txtVictorias = findViewById(R.id.txtVictorias);
+        txtDerrotas = findViewById(R.id.txtDerrotas);
 
         //cargar nombre del usuario
         loadUsername();
@@ -55,6 +58,19 @@ public class Perfil extends AppCompatActivity {
                         imageChooser();
                     }
                 });
+
+        cargarEstadisticas();
+    }
+
+    private void cargarEstadisticas() {
+        SharedPreferences prefs = getSharedPreferences("BingoPrefs", Context.MODE_PRIVATE);
+
+        //recuperar valores o 0 si no hay
+        int victorias = prefs.getInt("victorias", 0);
+        int derrotas = prefs.getInt("derrotas", 0);
+
+        txtVictorias.setText("Victorias: " + victorias);
+        txtDerrotas.setText("Derrotas: " + derrotas);
     }
 
     private void loadUsername() {
@@ -138,6 +154,7 @@ public class Perfil extends AppCompatActivity {
     @Override
     protected void onResume() {
         super.onResume();
+        cargarEstadisticas(); //recargar en caso de volver
         //iniciar musica
         if (music != null) {
             music.start();

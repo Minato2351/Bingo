@@ -12,14 +12,16 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
-
+import android.app.Dialog;
+import android.graphics.drawable.ColorDrawable;
+import android.view.Window;
+import android.content.SharedPreferences;
 import androidx.appcompat.app.AppCompatActivity;
-
 import java.lang.reflect.Array;
 import java.util.ArrayList;
 
 public class SolitarioJuego extends AppCompatActivity implements BingoCard.OnCardChangedListener {
-    private MediaPlayer music;
+    private MediaPlayer music, mpResultado;
 
     private GeneradorNumeros generadorNumeros; //Genera numeros a preionar y los guardaen un array
     private BingoCard bingoCard; //Genera una carta Bingo y guarda cuales se han seleccionado
@@ -82,9 +84,9 @@ public class SolitarioJuego extends AppCompatActivity implements BingoCard.OnCar
                     }
 
                     if (allFound) {
-                        Toast.makeText(SolitarioJuego.this, "GANASTE", Toast.LENGTH_SHORT).show();
+                        mostrarDialogo(true); //victoria
                     } else {
-                        Toast.makeText(SolitarioJuego.this, "PERDISTE", Toast.LENGTH_SHORT).show();
+                        mostrarDialogo(false); //derrota
                     }
                     Log.d("BingoNumeros", "Lista: " + numerosLlamados);
                     Log.d("BingoCarta", "Carta: " + numerosCarta);
@@ -186,13 +188,106 @@ public class SolitarioJuego extends AppCompatActivity implements BingoCard.OnCar
             handler.postDelayed(runnableJuego, TIEMPO_ESPERA); //prox llamada
         } else {
             txtNumero.setText("GAME");  //se terminan los numeros
-            Toast.makeText(this, "Se acabaron los números",
-                    Toast.LENGTH_SHORT).show();
+            mostrarDialogo(false);
         }
+    }
+
+    //cuadro de fin de juego
+    private void mostrarDialogo(boolean victoria) {
+        //detener generador num
+        if (handler != null && runnableJuego != null) {
+            handler.removeCallbacks(runnableJuego);
+        }
+
+        //detener musica y reproducir la de victoria/derrota
+        if (music != null && music.isPlaying()) {
+            music.pause();
+        }
+
+        int sonidoRes = victoria ? R.raw.victoria : R.raw.derrota;
+
+        detenerMusicaResultado();
+
+        mpResultado = MediaPlayer.create(this, sonidoRes);
+        if (mpResultado != null) {
+            mpResultado.start();
+            mpResultado.setOnCompletionListener(mp -> {
+                mp.release();
+                mpResultado = null; //limpiar ref
+            });
+        }
+
+        actualizarHistorial(victoria); //actualizar record v/d
+
+        //conf dialogo
+        Dialog dialog = new Dialog(this);
+        dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
+        dialog.setContentView(R.layout.fin_juego);
+        dialog.setCancelable(false); //no se quita tocando afuera
+        if (dialog.getWindow() != null) {
+            dialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+        }
+
+        TextView txtTitulo = dialog.findViewById(R.id.txtTitulo);
+        TextView txtMensaje = dialog.findViewById(R.id.txtMensaje);
+        Button btnReiniciar = dialog.findViewById(R.id.btnReiniciar);
+        Button btnMenu = dialog.findViewById(R.id.btnMenu);
+
+        //configurar los textos dependiendo el resultado
+        if (victoria) {
+            txtTitulo.setText("BINGO!");
+            txtTitulo.setTextColor(Color.parseColor("#4CAF50"));
+            txtMensaje.setText("¡Ganaste la partida, felicidades!");
+        } else {
+            txtTitulo.setText("PERDISTE!");
+            txtTitulo.setTextColor(Color.parseColor("#F44336"));
+            txtMensaje.setText("Pero, suerte para la próxima!");
+        }
+
+        btnReiniciar.setOnClickListener(v -> {
+            detenerMusicaResultado();
+            dialog.dismiss();
+            recreate();
+        });
+
+        btnMenu.setOnClickListener(v -> {
+            detenerMusicaResultado();
+            dialog.dismiss();
+            finish();
+        });
+
+        dialog.show();
+    }
+
+    private void actualizarHistorial(boolean esVictoria) {
+        //BingoPrefs
+        SharedPreferences prefs = getSharedPreferences("BingoPrefs", MODE_PRIVATE);
+        SharedPreferences.Editor editor = prefs.edit();
+
+        //obtener valores actuales y sumar 1 segun el caso
+        if (esVictoria) {
+            int victorias = prefs.getInt("victorias", 0);
+            editor.putInt("victorias", victorias + 1);
+        } else {
+            int derrotas = prefs.getInt("derrotas", 0);
+            editor.putInt("derrotas", derrotas + 1);
+        }
+
+        editor.apply(); //guardar cambios
     }
 
     /*--------------------------------------------------
     MUSICA*/
+    private void detenerMusicaResultado() {
+        if (mpResultado != null) {
+            if (mpResultado.isPlaying()) {
+                mpResultado.stop();
+            }
+            mpResultado.release();
+            mpResultado = null;
+        }
+    }
+
     private void efectoSonido() {
         MediaPlayer mp = MediaPlayer.create(this, R.raw.pop);
 
@@ -240,6 +335,8 @@ public class SolitarioJuego extends AppCompatActivity implements BingoCard.OnCar
             music.release();
             music = null;
         }
+
+        detenerMusicaResultado();
     }
 
     private void terminarJuego(){

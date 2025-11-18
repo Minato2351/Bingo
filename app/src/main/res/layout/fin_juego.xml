@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.cardview.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="300dp"
+    android:layout_height="wrap_content"
+    app:cardCornerRadius="20dp"
+    app:cardElevation="10dp"
+    app:cardBackgroundColor="#FFFFFF">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="24dp"
+        android:gravity="center">
+
+        <TextView
+            android:id="@+id/txtTitulo"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="TITULO"
+            android:textSize="36sp"
+            android:textColor="#0101ff"
+            android:fontFamily="@font/luckiest"
+            android:layout_marginBottom="16dp"/>
+
+        <TextView
+            android:id="@+id/txtMensaje"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Mensaje del juego"
+            android:textSize="18sp"
+            android:textColor="#000000"
+            android:textAlignment="center"
+            android:fontFamily="@font/luckiest"
+            android:layout_marginBottom="24dp"/>
+
+        <Button
+            android:id="@+id/btnReiniciar"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="JUGAR DE NUEVO"
+            android:textSize="20sp"
+            android:textColor="#FFFFFF"
+            android:fontFamily="@font/luckiest"
+            android:background="@drawable/gradiente2"
+            android:layout_marginBottom="12dp"/>
+
+        <Button
+            android:id="@+id/btnMenu"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="VOLVER AL MENÚ"
+            android:textSize="20sp"
+            android:textColor="#0101ff"
+            android:fontFamily="@font/luckiest"
+            android:background="@drawable/gradiente"/>
+
+    </LinearLayout>
+</androidx.cardview.widget.CardView>

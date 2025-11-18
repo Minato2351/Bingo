@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">Bingo</string>
+    <string name="app_name">Bingo!</string>
     <string name="TextBot">Número de Bots: </string>
     <string name="btnComenzar">COMENZAR PARTIDA</string>
     <string name="btnRegresar">REGRESAR</string>
