@@ -20,17 +20,29 @@ import android.content.SharedPreferences;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.lifecycle.MutableLiveData;
 
+import android.hardware.Sensor;
+import android.hardware.SensorEvent;
+import android.hardware.SensorEventListener;
+import android.hardware.SensorManager;
+import android.content.Context;
+
 import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.Arrays;
 
-public class SolitarioJuego extends AppCompatActivity implements BingoCard.OnCardChangedListener {
+public class SolitarioJuego extends AppCompatActivity implements BingoCard.OnCardChangedListener, SensorEventListener {
     private MediaPlayer music, mpResultado;
 
     private GeneradorNumeros generadorNumeros; //Genera numeros a preionar y los guardaen un array
     private BingoCard bingoCard; //Genera una carta Bingo y guarda cuales se han seleccionado
     private TextView txtNumero;
     private Button rainbowButton;
+
+    //variables sensor
+    private SensorManager sensorManager;
+    private Sensor accelerometer;
+    private static final float SHAKE_THRESHOLD = 15.0f; //sensibilidad, modificar en caso
+    private long lastShakeTime = 0;
 
     //tiempo entre cada numero
     private Handler handler = new Handler(Looper.getMainLooper());
@@ -43,7 +55,8 @@ public class SolitarioJuego extends AppCompatActivity implements BingoCard.OnCar
     //numero de bots
     int numBots = 0;
     private ArrayList<Bot> Bots;
-    MutableLiveData<Boolean> botWin = new MutableLiveData<>(false);
+    //MutableLiveData<Boolean> botWin = new MutableLiveData<>(false); saber el numbot
+    MutableLiveData<Integer> botWinIndex = new MutableLiveData<>(-1);
     private boolean detenerGenerador = false;
 
     private static final int TIEMPO_ESPERA = 3000; // 3 segundos
@@ -55,6 +68,12 @@ public class SolitarioJuego extends AppCompatActivity implements BingoCard.OnCar
 
         music = MediaPlayer.create(this, R.raw.inicio_juego);
         music.setLooping(true);
+
+        //sensor
+        sensorManager = (SensorManager) getSystemService(Context.SENSOR_SERVICE);
+        if (sensorManager != null) {
+            accelerometer = sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
+        }
 
         numBots = getIntent().getIntExtra("numBots",0);
         Bots = new ArrayList<>();
@@ -84,34 +103,21 @@ public class SolitarioJuego extends AppCompatActivity implements BingoCard.OnCar
         rainbowButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                numerosLlamados = generadorNumeros.getNumerosLlamados();
-
-                numerosCarta.clear(); //limpiar y buscar solo el bingo
-                ArrayList<Integer> ganadores = obtenerLineaGanadora();
-
-                if (ganadores != null && !ganadores.isEmpty()) {
-                    numerosCarta.addAll(ganadores);
-                    boolean allFound = true;
-                    for (int num : numerosCarta) {
-                        if (!numerosLlamados.contains(num)) {
-                            allFound = false;
-                            break;  // detenerse si uno no se encuentra
-                        }
-                    }
-
-                    if (allFound) {
-                        mostrarDialogo(true); //victoria
-                    } else {
-                        mostrarDialogo(false); //derrota
-                    }
-                }
+                realizarAccionBingo(); // Llamamos al nuevo método compartido
             }
         });
 
-        botWin.observe(this, isWin -> {
+        /*botWin.observe(this, isWin -> {
             if (isWin != null && isWin) {
                 detenerGenerador = true;
                 mostrarDialogo(false);
+            }
+        }); numbot*/
+
+        botWinIndex.observe(this, winningBot -> {
+            if (winningBot != -1) {
+                detenerGenerador = true;
+                mostrarDialogo(false, winningBot); //id del bot
             }
         });
 
@@ -133,6 +139,31 @@ public class SolitarioJuego extends AppCompatActivity implements BingoCard.OnCar
         };
 
         llamarSiguienteNumero();
+    }
+
+    //accion boton bingo y sensor
+    private void realizarAccionBingo() {
+        numerosLlamados = generadorNumeros.getNumerosLlamados();
+
+        numerosCarta.clear();
+        ArrayList<Integer> ganadores = obtenerLineaGanadora();
+
+        if (ganadores != null && !ganadores.isEmpty()) {
+            numerosCarta.addAll(ganadores);
+            boolean allFound = true;
+            for (int num : numerosCarta) {
+                if (!numerosLlamados.contains(num)) {
+                    allFound = false;
+                    break;
+                }
+            }
+
+            if (allFound) {
+                mostrarDialogo(true, -1);
+            } else {
+                mostrarDialogo(false, -1);
+            }
+        }
     }
 
     //se llama cada vez que se toque la carta
@@ -215,12 +246,12 @@ public class SolitarioJuego extends AppCompatActivity implements BingoCard.OnCar
             handler.postDelayed(runnableJuego, TIEMPO_ESPERA); //prox llamada
         } else {
             txtNumero.setText("GAME");  //se terminan los numeros
-            mostrarDialogo(false);
+            mostrarDialogo(false, -1);
         }
     }
 
     //cuadro de fin de juego
-    private void mostrarDialogo(boolean victoria) {
+    private void mostrarDialogo(boolean victoria, int botIndex) {
         //detener generador num
         if (handler != null && runnableJuego != null) {
             handler.removeCallbacks(runnableJuego);
@@ -268,7 +299,11 @@ public class SolitarioJuego extends AppCompatActivity implements BingoCard.OnCar
         } else {
             txtTitulo.setText("PERDISTE!");
             txtTitulo.setTextColor(Color.parseColor("#F44336"));
-            txtMensaje.setText("Pero, suerte para la próxima!");
+            if (botIndex != -1) {
+                txtMensaje.setText("Bot " + (botIndex + 1) + " ha ganado la partida.");
+            } else {
+                txtMensaje.setText("Se acabaron los números, suerte para la próxima!");
+            }
         }
 
         btnReiniciar.setOnClickListener(v -> {
@@ -319,7 +354,8 @@ public class SolitarioJuego extends AppCompatActivity implements BingoCard.OnCar
                         Bots.get(num).cuadrosBot[i][j].estampa = true;
                         found = true;
                         if (!obtenerLineaGanadoraBot(num).isEmpty()) {
-                            botWin.setValue(true);
+                            //botWin.setValue(true); numbot
+                            botWinIndex.setValue(num);
                             return;
                         }
                         break;
@@ -415,6 +451,11 @@ public class SolitarioJuego extends AppCompatActivity implements BingoCard.OnCar
         if (music != null) {
             music.start();
         }
+
+        //registrar sensor
+        if (sensorManager != null && accelerometer != null) {
+            sensorManager.registerListener(this, accelerometer, SensorManager.SENSOR_DELAY_NORMAL);
+        }
     }
 
     @Override
@@ -425,6 +466,11 @@ public class SolitarioJuego extends AppCompatActivity implements BingoCard.OnCar
             music.pause();
             //reiniciar
             music.seekTo(0);
+        }
+
+        //eliminar sensor
+        if (sensorManager != null) {
+            sensorManager.unregisterListener(this);
         }
     }
 
@@ -448,4 +494,33 @@ public class SolitarioJuego extends AppCompatActivity implements BingoCard.OnCar
     private void terminarJuego(){
 
     }
+
+    //SENSOR--------------------------------------
+    @Override
+    public void onSensorChanged(SensorEvent event) {
+        if (event.sensor.getType() == Sensor.TYPE_ACCELEROMETER) {
+            float x = event.values[0];
+            float y = event.values[1];
+            float z = event.values[2];
+
+            //magnitud
+            float currentAcceleration = (float) Math.sqrt(x * x + y * y + z * z);
+            float delta = currentAcceleration - SensorManager.GRAVITY_EARTH;
+
+            if (delta > SHAKE_THRESHOLD) {
+                long currentTime = System.currentTimeMillis();
+                if ((currentTime - lastShakeTime) > 1000) { //1seg entre sacudida
+                    lastShakeTime = currentTime;
+
+                    //solo funciona si el boton se activa
+                    if (rainbowButton.isEnabled()) {
+                        realizarAccionBingo();
+                    }
+                }
+            }
+        }
+    }
+
+    @Override
+    public void onAccuracyChanged(Sensor sensor, int accuracy) {}
 }
