@@ -150,9 +150,7 @@ public class BingoCard extends View {
             if (col >= 0 && col < 5 && row >= 0 && row < 5) {
                 int number = cuadros[col][row].numero;
                 if (number == 0 && col == 2 && row == 2) {
-                    Toast.makeText(getContext(), "FREE space!", Toast.LENGTH_SHORT).show();
                 } else {
-                    Toast.makeText(getContext(), "You tapped: " + number, Toast.LENGTH_SHORT).show();
                     if(cuadros[col][row].estampa == true){
                         cuadros[col][row].estampa = false;
                         invalidate();

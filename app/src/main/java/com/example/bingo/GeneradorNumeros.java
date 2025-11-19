@@ -16,6 +16,9 @@ public class GeneradorNumeros {
         numerosDisponibles = new ArrayList<>();
         numerosLlamados = new ArrayList<>();
 
+        //agrega el numero 0 (estrella central del carta)
+        numerosLlamados.add(0);
+
         for (int i = 1; i <= 75; i++) {
             numerosDisponibles.add(i);
         }
@@ -55,7 +58,10 @@ public class GeneradorNumeros {
     }
 
     public ArrayList<Integer> getNumerosLlamados() {
-        numerosLlamados.add(0);
         return numerosLlamados;
+    }
+
+    public int getNumeroActual(){
+        return numerosLlamados.get(numerosLlamados.size() - 1);
     }
 }

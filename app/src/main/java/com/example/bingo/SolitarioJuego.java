@@ -1,5 +1,6 @@
 package com.example.bingo;
 
+import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.graphics.drawable.GradientDrawable;
 import android.media.MediaPlayer;
@@ -17,8 +18,11 @@ import android.graphics.drawable.ColorDrawable;
 import android.view.Window;
 import android.content.SharedPreferences;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.lifecycle.MutableLiveData;
+
 import java.lang.reflect.Array;
 import java.util.ArrayList;
+import java.util.Arrays;
 
 public class SolitarioJuego extends AppCompatActivity implements BingoCard.OnCardChangedListener {
     private MediaPlayer music, mpResultado;
@@ -36,6 +40,12 @@ public class SolitarioJuego extends AppCompatActivity implements BingoCard.OnCar
     private ArrayList<Integer> numerosLlamados;
     private ArrayList<Integer> numerosCarta;
 
+    //numero de bots
+    int numBots = 0;
+    private ArrayList<Bot> Bots;
+    MutableLiveData<Boolean> botWin = new MutableLiveData<>(false);
+    private boolean detenerGenerador = false;
+
     private static final int TIEMPO_ESPERA = 3000; // 3 segundos
 
     @Override
@@ -45,6 +55,12 @@ public class SolitarioJuego extends AppCompatActivity implements BingoCard.OnCar
 
         music = MediaPlayer.create(this, R.raw.inicio_juego);
         music.setLooping(true);
+
+        numBots = getIntent().getIntExtra("numBots",0);
+        Bots = new ArrayList<>();
+        if(numBots != 0){
+            createBots();
+        }
 
         /*--------------------------------------------------
     BINGO!!! por ahora es un button pero le agregaremos un sensor*/
@@ -88,9 +104,14 @@ public class SolitarioJuego extends AppCompatActivity implements BingoCard.OnCar
                     } else {
                         mostrarDialogo(false); //derrota
                     }
-                    Log.d("BingoNumeros", "Lista: " + numerosLlamados);
-                    Log.d("BingoCarta", "Carta: " + numerosCarta);
                 }
+            }
+        });
+
+        botWin.observe(this, isWin -> {
+            if (isWin != null && isWin) {
+                detenerGenerador = true;
+                mostrarDialogo(false);
             }
         });
 
@@ -104,6 +125,9 @@ public class SolitarioJuego extends AppCompatActivity implements BingoCard.OnCar
         runnableJuego = new Runnable() {
             @Override
             public void run() {
+                if(detenerGenerador){
+                    return;
+                }
                 llamarSiguienteNumero();
             }
         };
@@ -184,7 +208,10 @@ public class SolitarioJuego extends AppCompatActivity implements BingoCard.OnCar
             txtNumero.setText(letra + "-" + num);
 
             efectoSonido();
-
+            if(numBots != 0){
+                runBots(); // los bots revisan si tienen el numero
+            }
+            Log.d("BotPresentados", "Numeros Presentados: " + generadorNumeros.getNumerosLlamados());
             handler.postDelayed(runnableJuego, TIEMPO_ESPERA); //prox llamada
         } else {
             txtNumero.setText("GAME");  //se terminan los numeros
@@ -276,6 +303,85 @@ public class SolitarioJuego extends AppCompatActivity implements BingoCard.OnCar
         editor.apply(); //guardar cambios
     }
 
+    /* ------------------------------  BOTS  ------------------------------- */
+    private void createBots(){
+        for(int i=0; i<numBots; i++){
+            Bots.add(new Bot());
+        }
+    }
+    private void runBots(){
+        int lastCalledNumber = generadorNumeros.getNumeroActual();
+        for(int num=0; num<numBots; num++){
+            boolean found = false;
+            for(int i=0; i<5 && !found; i++){
+                for(int j=0; j<5; j++){
+                    if(Bots.get(num).cuadrosBot[i][j].numero == lastCalledNumber){
+                        Bots.get(num).cuadrosBot[i][j].estampa = true;
+                        found = true;
+                        if (!obtenerLineaGanadoraBot(num).isEmpty()) {
+                            botWin.setValue(true);
+                            return;
+                        }
+                        break;
+                    }
+                }
+            }
+        }
+    }
+
+    //devuelve los numeros de la linea con bingo
+    private ArrayList<Integer> obtenerLineaGanadoraBot(int num) {
+        ArrayList<Integer> lineaGanadora = new ArrayList<>();
+        Cuadro[][] cuadrosBot = Bots.get(num).getCuadros();
+
+        if (cuadrosBot == null) {
+            return lineaGanadora;
+        }
+
+        //revisa filas
+        for (int j = 0; j <5; j++) {
+            if (cuadrosBot[0][j].estampa && cuadrosBot[1][j].estampa && cuadrosBot[2][j].estampa &&
+                    cuadrosBot[3][j].estampa && cuadrosBot[4][j].estampa) {
+                for (int i = 0; i < 5; i++) {
+                    lineaGanadora.add(cuadrosBot[i][j].numero); //fila completa, guardamos numeros
+                }
+                return lineaGanadora;
+            }
+        }
+
+        //revisa columnas
+        for (int i = 0; i <5; i++) {
+            if (cuadrosBot[i][0].estampa && cuadrosBot[i][1].estampa && cuadrosBot[i][2].estampa &&
+                    cuadrosBot[i][3].estampa && cuadrosBot[i][4].estampa) {
+                for (int j = 0; j < 5; j++) {
+                    lineaGanadora.add(cuadrosBot[i][j].numero); //col completa, guardamos numeros
+                }
+                return lineaGanadora;
+            }
+        }
+
+        //diagonal izq-der
+        if (cuadrosBot[0][0].estampa && cuadrosBot[1][1].estampa && cuadrosBot[2][2].estampa &&
+                cuadrosBot[3][3].estampa && cuadrosBot[4][4].estampa) {
+
+            for(int k=0; k<5; k++) {
+                lineaGanadora.add(cuadrosBot[k][k].numero);
+            }
+            return lineaGanadora;
+        }
+
+        //diagonal der-izq
+        if (cuadrosBot[4][0].estampa && cuadrosBot[3][1].estampa && cuadrosBot[2][2].estampa &&
+                cuadrosBot[1][3].estampa && cuadrosBot[0][4].estampa) {
+
+            for(int k=0; k<5; k++) {
+                lineaGanadora.add(cuadrosBot[4-k][k].numero);
+            }
+            return lineaGanadora;
+        }
+
+        return lineaGanadora; //vacia si no hay bingo
+    }
     /*--------------------------------------------------
     MUSICA*/
     private void detenerMusicaResultado() {

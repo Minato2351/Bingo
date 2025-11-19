@@ -31,6 +31,9 @@ public class SolitarioMenu extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 Intent intent = new Intent(SolitarioMenu.this, SolitarioJuego.class);
+                String text = TextBotNum.getText().toString();
+                int value = Integer.parseInt(text);
+                intent.putExtra("numBots", value); //manda al SolitarioJuego el numBots
                 startActivity(intent);
             }
         });
