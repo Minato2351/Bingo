@@ -11,8 +11,8 @@ android {
 
     defaultConfig {
         applicationId = "com.example.bingo"
-        minSdk = 31
-        targetSdk = 36
+        minSdk = 28
+        targetSdk = 28
         versionCode = 1
         versionName = "1.0"
 

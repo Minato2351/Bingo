@@ -1,0 +1,157 @@
+package com.example.bingo;
+
+import android.content.Context;
+import android.content.Intent;
+import android.content.SharedPreferences;
+import android.media.MediaPlayer;
+import android.net.wifi.WifiInfo;
+import android.net.wifi.WifiManager;
+import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
+import android.view.View;
+import android.widget.Button;
+import android.widget.TextView;
+import android.widget.Toast;
+import androidx.appcompat.app.AppCompatActivity;
+
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.PrintWriter;
+import java.net.InetAddress;
+import java.net.ServerSocket;
+import java.net.Socket;
+import java.net.UnknownHostException;
+import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
+
+public class SalaEsperaActivity extends AppCompatActivity {
+
+    private TextView tvRoomID, tvStatus;
+    private Button btnIniciarPartida;
+    private MediaPlayer music;
+    private boolean isHost;
+    private ServerSocket serverSocket;
+    private Socket clientSocket;
+    private Thread connectionThread;
+    private final int PORT = 8888;
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_sala_espera);
+
+        tvRoomID = findViewById(R.id.tvRoomID);
+        tvStatus = findViewById(R.id.tvStatus);
+        btnIniciarPartida = findViewById(R.id.btnIniciarPartida);
+
+        music = MediaPlayer.create(this, R.raw.sala_espera);
+        music.setLooping(true);
+        music.start();
+
+        //datos del menu
+        isHost = getIntent().getBooleanExtra("isHost", false);
+
+        if (isHost) {
+            setupServer();
+        } else {
+            String hostIp = getIntent().getStringExtra("hostIp");
+            setupClient(hostIp);
+        }
+    }
+
+    //host
+    private void setupServer() {
+        String ip = getLocalIpAddress();
+        tvRoomID.setText("ID DE SALA: " + ip);
+        tvStatus.setText("Esperando jugadores...");
+
+        connectionThread = new Thread(() -> {
+            try {
+                serverSocket = new ServerSocket(PORT);
+                //esperar conexion
+                clientSocket = serverSocket.accept();
+
+                //leer el nombre enviado por el cliente
+                BufferedReader in = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
+                final String nombreRival = in.readLine();
+
+                //jugador conectado
+                runOnUiThread(() -> {
+                    tvStatus.setText("¡" + nombreRival + " se ha unido!");
+                    btnIniciarPartida.setVisibility(View.VISIBLE);
+                    btnIniciarPartida.setOnClickListener(v -> startGame());
+                });
+
+            } catch (IOException e) {
+                e.printStackTrace();
+                runOnUiThread(() -> tvStatus.setText("Error al crear servidor"));
+            }
+        });
+        connectionThread.start();
+    }
+
+    //cliente
+    private void setupClient(String hostIp) {
+        tvRoomID.setVisibility(View.GONE);
+        tvStatus.setText("Conectando a: " + hostIp + "...");
+
+        connectionThread = new Thread(() -> {
+            try {
+                clientSocket = new Socket(hostIp, PORT);
+
+                //obtener el nombre guardado del usuario
+                SharedPreferences prefs = getSharedPreferences("BingoPrefs", MODE_PRIVATE);
+                String miNombre = prefs.getString("username", "Invitado");
+
+                //enviar el nombre al servidor
+                PrintWriter out = new PrintWriter(clientSocket.getOutputStream(), true);
+                out.println(miNombre);
+
+                runOnUiThread(() -> tvStatus.setText("Conectado. Esperando al líder..."));
+
+                //aqui se puede poner cuando el host inicie el juego
+
+            } catch (IOException e) {
+                e.printStackTrace();
+                runOnUiThread(() -> {
+                    tvStatus.setText("Error: No se encontró la partida");
+                    Toast.makeText(this, "Verifica el ID (IP)", Toast.LENGTH_LONG).show();
+                });
+            }
+        });
+        connectionThread.start();
+    }
+
+    private void startGame() {
+
+        Toast.makeText(this, "Iniciando juego...", Toast.LENGTH_SHORT).show();
+    }
+
+    //obtener la ipx1
+    private String getLocalIpAddress() {
+        WifiManager wifiManager = (WifiManager) getApplicationContext().getSystemService(Context.WIFI_SERVICE);
+        WifiInfo wifiInfo = wifiManager.getConnectionInfo();
+        int ipInt = wifiInfo.getIpAddress();
+        try {
+            return InetAddress.getByAddress(
+                            ByteBuffer.allocate(4).order(ByteOrder.LITTLE_ENDIAN).putInt(ipInt).array())
+                    .getHostAddress();
+        } catch (UnknownHostException e) {
+            return "Error IP";
+        }
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        if (music != null) music.release();
+        try {
+            if (serverSocket != null) serverSocket.close();
+            if (clientSocket != null) clientSocket.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+}
