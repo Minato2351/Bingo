@@ -38,6 +38,8 @@ public class SalaEsperaActivity extends AppCompatActivity {
     private Thread connectionThread;
     private final int PORT = 8888;
 
+    private boolean iniciandoJuego = false;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -117,18 +119,17 @@ public class SalaEsperaActivity extends AppCompatActivity {
 
                 //bloqueado hasta recibir el mensaje
                 while ((mensaje = in.readLine()) != null) {
-                    if (mensaje.startsWith("START: ")) {
+                    if (mensaje.startsWith("START:")) {
                         //extraer semilla
                         String[] partes = mensaje.split(":");
                         long seed = Long.parseLong(partes[1]);
-
-                        //guardar socket y saltar al juego
-                        GestorRed.setSocket(clientSocket);
 
                         runOnUiThread(() -> {
                             Intent intent = new Intent(SalaEsperaActivity.this, MultijugadorJuego.class);
                             intent.putExtra("seed", seed); //misma semilla que el host
                             intent.putExtra("isHost", false);
+                            GestorRed.setSocket(clientSocket);
+                            iniciandoJuego = true;
                             startActivity(intent);
                             finish();
                         });
@@ -156,16 +157,15 @@ public class SalaEsperaActivity extends AppCompatActivity {
             try {
                 if (clientSocket != null) {
                     PrintWriter out = new PrintWriter(clientSocket.getOutputStream(), true);
-                    out.println("START: " + seed);
-
-                    //guardar la conexion en el gestor para usarla luego
-                    GestorRed.setSocket(clientSocket);
+                    out.println("START:" + seed);
 
                     //iniciar el juego
                     runOnUiThread(() -> {
                         Intent intent = new Intent(SalaEsperaActivity.this, MultijugadorJuego.class);
                         intent.putExtra("seed", seed); //pasar la semilla
                         intent.putExtra("isHost", true);
+                        GestorRed.setSocket(clientSocket);
+                        iniciandoJuego = true;
                         startActivity(intent);
                         finish();
                     });
@@ -194,11 +194,14 @@ public class SalaEsperaActivity extends AppCompatActivity {
     protected void onDestroy() {
         super.onDestroy();
         if (music != null) music.release();
-        try {
-            if (serverSocket != null) serverSocket.close();
-            if (clientSocket != null) clientSocket.close();
-        } catch (IOException e) {
-            e.printStackTrace();
+
+        if (!iniciandoJuego) {
+            try {
+                if (serverSocket != null) serverSocket.close();
+                if (clientSocket != null) clientSocket.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
         }
     }
 }

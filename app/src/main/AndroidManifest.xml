@@ -36,6 +36,7 @@
         <activity android:name=".RegistrarActivity" android:screenOrientation="portrait"/>
         <activity android:name=".SolitarioJuego" android:screenOrientation="portrait"/>
         <activity android:name=".SalaEsperaActivity" android:exported="false" android:screenOrientation="portrait"/>
+        <activity android:name=".MultijugadorJuego" android:screenOrientation="portrait"/>
     </application>
 
 </manifest>
