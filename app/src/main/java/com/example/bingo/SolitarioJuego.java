@@ -61,6 +61,9 @@ public class SolitarioJuego extends AppCompatActivity implements BingoCard.OnCar
     MutableLiveData<Integer> botWinIndex = new MutableLiveData<>(-1);
     protected boolean detenerGenerador = false;
 
+    //nombre del rival en multijugador
+    protected String nombreRival = "Rival";
+
     private static final int TIEMPO_ESPERA = 3000; // 3 segundos
 
     @Override
@@ -163,7 +166,7 @@ public class SolitarioJuego extends AppCompatActivity implements BingoCard.OnCar
             if (allFound) {
                 mostrarDialogo(true, -1);
             } else {
-                mostrarDialogo(false, -1);
+                mostrarDialogo(false, -3);
             }
         }
     }
@@ -293,6 +296,11 @@ public class SolitarioJuego extends AppCompatActivity implements BingoCard.OnCar
         Button btnReiniciar = dialog.findViewById(R.id.btnReiniciar);
         Button btnMenu = dialog.findViewById(R.id.btnMenu);
 
+        //si esta en multijugador quitamos el boton de reinciar
+        if (this instanceof MultijugadorJuego) {
+            btnReiniciar.setVisibility(View.GONE);
+        }
+
         //configurar los textos dependiendo el resultado
         if (victoria) {
             txtTitulo.setText("BINGO!");
@@ -301,9 +309,22 @@ public class SolitarioJuego extends AppCompatActivity implements BingoCard.OnCar
         } else {
             txtTitulo.setText("PERDISTE!");
             txtTitulo.setTextColor(Color.parseColor("#F44336"));
-            if (botIndex != -1) {
+            if (botIndex >= 0) {
+                //gana un bot
                 txtMensaje.setText("Bot " + (botIndex + 1) + " ha ganado la partida.");
+            } else if (botIndex == -2) {
+                //gana otro usuario
+                txtMensaje.setText("¡" + nombreRival + " ha cantado BINGO!");
+            } else if (botIndex == -3) {
+                //BINGO FALSO, en multiplayer, mensaje y nombre del rival
+                if (this instanceof MultijugadorJuego) {
+                    txtMensaje.setText("¡BINGO FALSO! " + nombreRival + " gana la partida automáticamente.");
+                } else {
+                    //solo mensaje
+                    txtMensaje.setText("¡BINGO FALSO! Has marcado números que no han salido.");
+                }
             } else {
+                //se acaban los numeros
                 txtMensaje.setText("Se acabaron los números, suerte para la próxima!");
             }
         }

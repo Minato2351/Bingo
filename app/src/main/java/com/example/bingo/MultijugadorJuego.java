@@ -1,6 +1,10 @@
 package com.example.bingo;
 
 import android.os.Bundle;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.widget.ImageView;
+import android.widget.TextView;
 import android.widget.Toast;
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -18,8 +22,11 @@ public class MultijugadorJuego extends SolitarioJuego {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        // Al llamar a super, SolitarioJuego inicia su propia partida automáticamente.
-        // Nosotros debemos detenerla y reiniciarla con nuestros datos sincronizados.
+
+        String nombreRecibido = getIntent().getStringExtra("nombreRival");
+        if (nombreRecibido != null) {
+            this.nombreRival = nombreRecibido; //sobreescribir variable padre
+        }
 
         //recuperar datos del intent
         long seed = getIntent().getLongExtra("seed", -1);
@@ -29,7 +36,7 @@ public class MultijugadorJuego extends SolitarioJuego {
         if (socket != null) {
             setupNetwork();
         } else {
-            Toast.makeText(this, "Error: Conexión perdida", Toast.LENGTH_SHORT).show();
+            mostrarToastPersonalizado("Verifica el ID (IP)", R.drawable.alert);
         }
 
         //sync generador de numeros
@@ -46,6 +53,9 @@ public class MultijugadorJuego extends SolitarioJuego {
             if (txtNumero != null) {
                 txtNumero.setText("LISTOS...");
             }
+
+            //reiniciar bandera de control
+            detenerGenerador = false;
 
             //bucle de juego ahora con generador sync
             handler.postDelayed(runnableJuego, 2000);
@@ -66,17 +76,23 @@ public class MultijugadorJuego extends SolitarioJuego {
                 BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
                 String msg;
                 while ((msg = in.readLine()) != null) {
+                    //el rival tiene bingo, pierdes
                     if (msg.equals("BINGO_WIN")) {
-                        //rival gana
                         runOnUiThread(() -> {
                             //detener juego
                             detenerGenerador = true;
                             if (handler != null) handler.removeCallbacks(runnableJuego);
-
                             //pantalla derrota
-                            mostrarDialogo(false, -1);
+                            mostrarDialogo(false, -2);
                         });
                         break; //salir bucle
+                    } else if (msg.equals("RIVAL_PERDIO")) {
+                        runOnUiThread(() -> {
+                            detenerGenerador = true;
+                            if (handler != null) handler.removeCallbacksAndMessages(null);
+                            //victoria
+                            mostrarDialogo(true, -1);
+                        });
                     }
                 }
             } catch (IOException e) {
@@ -101,7 +117,7 @@ public class MultijugadorJuego extends SolitarioJuego {
             }
 
             if (allFound) {
-                //avisar cliente o servidor
+                //avisar cliente o servidor que ganaste
                 new Thread(() -> {
                     if (out != null) out.println("BINGO_WIN");
                 }).start();
@@ -110,8 +126,12 @@ public class MultijugadorJuego extends SolitarioJuego {
                 mostrarDialogo(true, -1);
 
             } else {
-                //bingo incorrecto
-                mostrarDialogo(false, -1);
+                //bingo incorrecto, avisar al rival que perdiste por bingo falso
+                new Thread(() -> {
+                    if (out != null) out.println("RIVAL_PERDIO");
+                }).start();
+
+                mostrarDialogo(false, -3);
             }
         }
     }
@@ -127,5 +147,23 @@ public class MultijugadorJuego extends SolitarioJuego {
         } catch (IOException e) {
             e.printStackTrace();
         }
+    }
+
+    public void mostrarToastPersonalizado(String mensaje, int iconoResId) {
+        LayoutInflater inflater = getLayoutInflater();
+        View layout = inflater.inflate(R.layout.custom_toast, null);
+
+        TextView text = layout.findViewById(R.id.toast_text);
+        text.setText(mensaje);
+
+        ImageView image = layout.findViewById(R.id.toast_icon);
+        if (iconoResId != 0) {
+            image.setImageResource(iconoResId);
+        }
+
+        Toast toast = new Toast(getApplicationContext());
+        toast.setDuration(Toast.LENGTH_SHORT);
+        toast.setView(layout);
+        toast.show();
     }
 }

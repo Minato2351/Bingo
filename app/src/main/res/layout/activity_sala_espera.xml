@@ -43,6 +43,7 @@
         android:layout_height="wrap_content"
         android:text="INICIAR JUEGO"
         android:fontFamily="@font/luckiest"
-        android:backgroundTint="#4CAF50"
+        android:background="@drawable/gradiente"
+        android:textColor="#0101ff"
         android:layout_marginTop="40dp"
         android:visibility="gone"/> </LinearLayout>

@@ -9,8 +9,10 @@ import android.net.wifi.WifiManager;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.Button;
+import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
@@ -80,11 +82,17 @@ public class SalaEsperaActivity extends AppCompatActivity {
                 BufferedReader in = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
                 final String nombreRival = in.readLine();
 
+                //enviar el nombre hosto a cliente
+                PrintWriter out = new PrintWriter(clientSocket.getOutputStream(), true);
+                SharedPreferences prefs = getSharedPreferences("BingoPrefs", MODE_PRIVATE);
+                String miNombre = prefs.getString("username", "Host");
+                out.println(miNombre);
+
                 //jugador conectado
                 runOnUiThread(() -> {
                     tvStatus.setText("¡" + nombreRival + " se ha unido!");
                     btnIniciarPartida.setVisibility(View.VISIBLE);
-                    btnIniciarPartida.setOnClickListener(v -> startGame());
+                    btnIniciarPartida.setOnClickListener(v -> startGame(nombreRival));
                 });
 
             } catch (IOException e) {
@@ -111,13 +119,14 @@ public class SalaEsperaActivity extends AppCompatActivity {
                 PrintWriter out = new PrintWriter(clientSocket.getOutputStream(), true);
                 out.println(miNombre);
 
-                runOnUiThread(() -> tvStatus.setText("Conectado. Esperando al líder..."));
-
-                //bucle de espera de señal
+                //recibir nombre del host
                 BufferedReader in = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
-                String mensaje;
+                String nombreHost = in.readLine();
 
-                //bloqueado hasta recibir el mensaje
+                runOnUiThread(() -> tvStatus.setText("Conectado con " + nombreHost + ". Esperando inicio..."));
+
+                //bucle esperando start
+                String mensaje;
                 while ((mensaje = in.readLine()) != null) {
                     if (mensaje.startsWith("START:")) {
                         //extraer semilla
@@ -128,6 +137,7 @@ public class SalaEsperaActivity extends AppCompatActivity {
                             Intent intent = new Intent(SalaEsperaActivity.this, MultijugadorJuego.class);
                             intent.putExtra("seed", seed); //misma semilla que el host
                             intent.putExtra("isHost", false);
+                            intent.putExtra("nombreRival", nombreHost); //pasar nombre host al juego
                             GestorRed.setSocket(clientSocket);
                             iniciandoJuego = true;
                             startActivity(intent);
@@ -141,14 +151,14 @@ public class SalaEsperaActivity extends AppCompatActivity {
                 e.printStackTrace();
                 runOnUiThread(() -> {
                     tvStatus.setText("Error: No se encontró la partida");
-                    Toast.makeText(this, "Verifica el ID (IP)", Toast.LENGTH_LONG).show();
+                    mostrarToastPersonalizado("Verifica el ID (IP)", R.drawable.alert);
                 });
             }
         });
         connectionThread.start();
     }
 
-    private void startGame() {
+    private void startGame(String nombreRival) {
         //generar semilla comun en base al tiempo
         long seed = System.currentTimeMillis();
 
@@ -164,6 +174,8 @@ public class SalaEsperaActivity extends AppCompatActivity {
                         Intent intent = new Intent(SalaEsperaActivity.this, MultijugadorJuego.class);
                         intent.putExtra("seed", seed); //pasar la semilla
                         intent.putExtra("isHost", true);
+                        intent.putExtra("nombreRival", nombreRival);
+
                         GestorRed.setSocket(clientSocket);
                         iniciandoJuego = true;
                         startActivity(intent);
@@ -203,5 +215,24 @@ public class SalaEsperaActivity extends AppCompatActivity {
                 e.printStackTrace();
             }
         }
+    }
+
+    //toast
+    public void mostrarToastPersonalizado(String mensaje, int iconoResId) {
+        LayoutInflater inflater = getLayoutInflater();
+        View layout = inflater.inflate(R.layout.custom_toast, null);
+
+        TextView text = layout.findViewById(R.id.toast_text);
+        text.setText(mensaje);
+
+        ImageView image = layout.findViewById(R.id.toast_icon);
+        if (iconoResId != 0) {
+            image.setImageResource(iconoResId);
+        }
+
+        Toast toast = new Toast(getApplicationContext());
+        toast.setDuration(Toast.LENGTH_SHORT);
+        toast.setView(layout);
+        toast.show();
     }
 }
