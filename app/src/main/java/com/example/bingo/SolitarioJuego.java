@@ -33,9 +33,11 @@ import java.util.Arrays;
 public class SolitarioJuego extends AppCompatActivity implements BingoCard.OnCardChangedListener, SensorEventListener {
     private MediaPlayer music, mpResultado;
 
-    private GeneradorNumeros generadorNumeros; //Genera numeros a preionar y los guardaen un array
+    //private a protected pq las usaremos en multijugador juego
+
+    protected GeneradorNumeros generadorNumeros; //Genera numeros a preionar y los guardaen un array
     private BingoCard bingoCard; //Genera una carta Bingo y guarda cuales se han seleccionado
-    private TextView txtNumero;
+    protected TextView txtNumero;
     private Button rainbowButton;
 
     //variables sensor
@@ -45,8 +47,8 @@ public class SolitarioJuego extends AppCompatActivity implements BingoCard.OnCar
     private long lastShakeTime = 0;
 
     //tiempo entre cada numero
-    private Handler handler = new Handler(Looper.getMainLooper());
-    private Runnable runnableJuego;
+    protected Handler handler = new Handler(Looper.getMainLooper());
+    protected Runnable runnableJuego;
 
     //variables utilizados para verificar si termina el juego o no
     private ArrayList<Integer> numerosLlamados;
@@ -57,7 +59,7 @@ public class SolitarioJuego extends AppCompatActivity implements BingoCard.OnCar
     private ArrayList<Bot> Bots;
     //MutableLiveData<Boolean> botWin = new MutableLiveData<>(false); saber el numbot
     MutableLiveData<Integer> botWinIndex = new MutableLiveData<>(-1);
-    private boolean detenerGenerador = false;
+    protected boolean detenerGenerador = false;
 
     private static final int TIEMPO_ESPERA = 3000; // 3 segundos
 
@@ -142,7 +144,7 @@ public class SolitarioJuego extends AppCompatActivity implements BingoCard.OnCar
     }
 
     //accion boton bingo y sensor
-    private void realizarAccionBingo() {
+    protected void realizarAccionBingo() {
         numerosLlamados = generadorNumeros.getNumerosLlamados();
 
         numerosCarta.clear();
@@ -178,7 +180,7 @@ public class SolitarioJuego extends AppCompatActivity implements BingoCard.OnCar
     }
 
     //devuelve los numeros de la linea con bingo
-    private ArrayList<Integer> obtenerLineaGanadora() {
+    protected ArrayList<Integer> obtenerLineaGanadora() {
         ArrayList<Integer> lineaGanadora = new ArrayList<>();
         Cuadro[][] cuadros = bingoCard.getCuadros();
 
@@ -251,7 +253,7 @@ public class SolitarioJuego extends AppCompatActivity implements BingoCard.OnCar
     }
 
     //cuadro de fin de juego
-    private void mostrarDialogo(boolean victoria, int botIndex) {
+    protected void mostrarDialogo(boolean victoria, int botIndex) {
         //detener generador num
         if (handler != null && runnableJuego != null) {
             handler.removeCallbacks(runnableJuego);

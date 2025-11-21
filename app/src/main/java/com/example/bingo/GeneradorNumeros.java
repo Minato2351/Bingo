@@ -3,28 +3,31 @@ package com.example.bingo;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Random;
 
 public class GeneradorNumeros {
 
-    //todos los num posibles, 1-75
-    private List<Integer> numerosDisponibles;
+    private List<Integer> numerosDisponibles; //1-75
+    private ArrayList<Integer> numerosLlamados; //guardar numeros
 
-    //guardar numeros
-    private ArrayList<Integer> numerosLlamados;
-
+    //modo solitario
     public GeneradorNumeros() {
+        this(System.currentTimeMillis());
+    }
+
+    //semilla para multijugador
+    public GeneradorNumeros(long seed) {
         numerosDisponibles = new ArrayList<>();
         numerosLlamados = new ArrayList<>();
 
-        //agrega el numero 0 (estrella central del carta)
-        numerosLlamados.add(0);
+        numerosLlamados.add(0); //agrega el numero 0 (estrella central del carta)
 
         for (int i = 1; i <= 75; i++) {
             numerosDisponibles.add(i);
         }
 
-        //ordenar random
-        Collections.shuffle(numerosDisponibles);
+        //random con semilla compartida
+        Collections.shuffle(numerosDisponibles, new Random(seed));
     }
 
     public int llamarSiguienteNumero() {

@@ -14,7 +14,7 @@ import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
-
+import com.example.bingo.GestorRed;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -23,6 +23,7 @@ import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.net.UnknownHostException;
+import java.nio.Buffer;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 
@@ -99,19 +100,41 @@ public class SalaEsperaActivity extends AppCompatActivity {
 
         connectionThread = new Thread(() -> {
             try {
+                //conectar
                 clientSocket = new Socket(hostIp, PORT);
 
-                //obtener el nombre guardado del usuario
+                //obtener el nombre guardado del usuario y enviar nombre al servidor
                 SharedPreferences prefs = getSharedPreferences("BingoPrefs", MODE_PRIVATE);
                 String miNombre = prefs.getString("username", "Invitado");
-
-                //enviar el nombre al servidor
                 PrintWriter out = new PrintWriter(clientSocket.getOutputStream(), true);
                 out.println(miNombre);
 
                 runOnUiThread(() -> tvStatus.setText("Conectado. Esperando al líder..."));
 
-                //aqui se puede poner cuando el host inicie el juego
+                //bucle de espera de señal
+                BufferedReader in = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
+                String mensaje;
+
+                //bloqueado hasta recibir el mensaje
+                while ((mensaje = in.readLine()) != null) {
+                    if (mensaje.startsWith("START: ")) {
+                        //extraer semilla
+                        String[] partes = mensaje.split(":");
+                        long seed = Long.parseLong(partes[1]);
+
+                        //guardar socket y saltar al juego
+                        GestorRed.setSocket(clientSocket);
+
+                        runOnUiThread(() -> {
+                            Intent intent = new Intent(SalaEsperaActivity.this, MultijugadorJuego.class);
+                            intent.putExtra("seed", seed); //misma semilla que el host
+                            intent.putExtra("isHost", false);
+                            startActivity(intent);
+                            finish();
+                        });
+                        break; //salir bucle
+                    }
+                }
 
             } catch (IOException e) {
                 e.printStackTrace();
@@ -125,8 +148,32 @@ public class SalaEsperaActivity extends AppCompatActivity {
     }
 
     private void startGame() {
+        //generar semilla comun en base al tiempo
+        long seed = System.currentTimeMillis();
 
-        Toast.makeText(this, "Iniciando juego...", Toast.LENGTH_SHORT).show();
+        //enviar start y semilla al cliente
+        new Thread(() -> {
+            try {
+                if (clientSocket != null) {
+                    PrintWriter out = new PrintWriter(clientSocket.getOutputStream(), true);
+                    out.println("START: " + seed);
+
+                    //guardar la conexion en el gestor para usarla luego
+                    GestorRed.setSocket(clientSocket);
+
+                    //iniciar el juego
+                    runOnUiThread(() -> {
+                        Intent intent = new Intent(SalaEsperaActivity.this, MultijugadorJuego.class);
+                        intent.putExtra("seed", seed); //pasar la semilla
+                        intent.putExtra("isHost", true);
+                        startActivity(intent);
+                        finish();
+                    });
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }).start();
     }
 
     //obtener la ipx1
