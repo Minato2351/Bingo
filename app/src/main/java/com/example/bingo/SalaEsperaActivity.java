@@ -207,10 +207,21 @@ public class SalaEsperaActivity extends AppCompatActivity {
         super.onDestroy();
         if (music != null) music.release();
 
+        //cerrar el server socket
+        try {
+            if (serverSocket != null && !serverSocket.isClosed()) {
+                serverSocket.close();
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        //client socket solo se cierra si no vamos a jugar
         if (!iniciandoJuego) {
             try {
-                if (serverSocket != null) serverSocket.close();
-                if (clientSocket != null) clientSocket.close();
+                if (clientSocket != null && !clientSocket.isClosed()) {
+                    clientSocket.close();
+                }
             } catch (IOException e) {
                 e.printStackTrace();
             }
