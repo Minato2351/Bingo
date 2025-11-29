@@ -27,7 +27,7 @@
         android:background="@drawable/gradiente"
         android:textColor="@color/black"/>
 
-    <EditText
+    <com.example.bingo.CustomEditText
         android:id="@+id/etUsername"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -35,6 +35,7 @@
         android:inputType="textPersonName"
         android:layout_marginTop="16dp"
         android:fontFamily="@font/luckiest"
+        android:paddingEnd="60dp"
         android:background="@drawable/gradiente"/>
 
     <Button
